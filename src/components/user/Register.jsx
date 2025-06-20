@@ -4,6 +4,8 @@ import { CgRename } from "react-icons/cg";
 import { MdAlternateEmail } from "react-icons/md";
 import { TbPasswordFingerprint } from "react-icons/tb";
 import { FaRepeat } from "react-icons/fa6";
+import { validatePassword } from 'val-pass';
+import toast from 'react-hot-toast'
 
 const Register = () => {
   let [formData,setFormData]=useState({
@@ -12,15 +14,41 @@ const Register = () => {
     email:"",
     password:""
   })
+  const[matched,setMatched]=useState(true)
+  const [errorMessage,setErrorMessage]=useState("")
+    
+  let handleCheckPassword=(e)=>{
+    let {value}=e.target
+    formData.password !=value? setMatched(false) : setMatched(true)
+    value==""&&setMatched(true)
+  }
 
   let handleChange=(e)=>{
      let{name,value}=e.target
-     setFormData({...formData,[name]:value})
+    if (name=="password") {
+      let {validateAll,getAllValidationErrorMessage}=validatePassword(value,8)
+      // console.log(getAllValidationErrorMessage);
+      validateAll() ?setErrorMessage(""): setErrorMessage(getAllValidationErrorMessage);
+      value==""&&setErrorMessage("")
+    } 
+      setFormData({...formData,[name]:value})
   }
+
   let handleSubmit=(e)=>{
     e.preventDefault()
+    let {name,userName,email,password}=formData
+    if(!name || !userName || !email || !password){
+      toast.error("All fields are madatory")
+      return 
+    }
+    let {validateAll,getAllValidationErrorMessage}=validatePassword(password)
+    if(!validateAll()){
+      toast.error(`${getAllValidationErrorMessage()}`)
+    }
+    if(!matched){
+      toast.error("password and confirmPassword are not matched")
+    }
     console.log(formData);
-    
   }
 
   return (
@@ -50,13 +78,18 @@ const Register = () => {
         <span><TbPasswordFingerprint /></span>
        </div>
 
-       <div  className='bg-[#efefef] w-full px-3 py-1 border-2 rounded-l flex justify-between items-center '>
-        <input type="password"   name='' placeholder='re-write password'  className='w-full outline-0' onChange={handleChange}/>
+       <div  className={errorMessage? 'w-full px-3 py-1  flex justify-between items-center':"hidden"}>
+          <span className='text-red-500'>*{errorMessage}</span>
+       </div>
+
+       <div  className={`bg-[#efefef] w-full px-3 py-1 border-2 rounded-l flex justify-between items-center ${matched? "border-black" : "border-red-600"} `}>
+        <input type="password"   name='' placeholder='re-write password'  className='w-full outline-0' onChange={handleCheckPassword}/>
+
         <span><FaRepeat /></span>
        </div>
 
-       <div  className='bg-black w-full px-3 py-1 border-2 rounded-l text-cyan-50  flex justify-center items-center'>
-        <button>Click</button>
+       <div  className='bg-black w-full px-3 py-1 border-2 rounded-l text-cyan-50  flex justify-center items-center hover:bg-gray-700 hover:accent-cyan-500 hover:active:scale-[0.9]'>
+        <button className='font-bold text-white w-full'>Click</button>
        </div>
    </form>
        
