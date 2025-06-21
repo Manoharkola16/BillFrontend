@@ -6,6 +6,8 @@ import { TbPasswordFingerprint } from "react-icons/tb";
 import { FaRepeat } from "react-icons/fa6";
 import { validatePassword } from 'val-pass';
 import toast from 'react-hot-toast'
+import empServices from '../../service/empService';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
   let [formData,setFormData]=useState({
@@ -16,6 +18,7 @@ const Register = () => {
   })
   const[matched,setMatched]=useState(true)
   const [errorMessage,setErrorMessage]=useState("")
+  const navigate=useNavigate()
     
   let handleCheckPassword=(e)=>{
     let {value}=e.target
@@ -32,6 +35,9 @@ const Register = () => {
       value==""&&setErrorMessage("")
     } 
       setFormData({...formData,[name]:value})
+
+     
+
   }
 
   let handleSubmit=(e)=>{
@@ -49,6 +55,21 @@ const Register = () => {
       toast.error("password and confirmPassword are not matched")
     }
     console.log(formData);
+   
+    (async()=>{
+       let data= await empServices.regiUser(formData)
+     try {
+      if(data.status==201){
+        toast.success("Register succssfully")
+        navigate("/login")
+      }else{
+        toast.error("something went wrong")
+      }
+
+     } catch (error) {
+      
+     }
+    })()
   }
 
   return (
